@@ -85,7 +85,7 @@ class InstagramMediaRequest : Parcelable {
         ctx: Context?,
         isToShowLoaders: Boolean
     ) {
-        requestTask = object : AsyncTask<Void?, Void?, MediaResponse>() {
+        requestTask = object : AsyncTask<Void?, Void?, MediaResponse?>() {
             private var context: Context? = null
             override fun onPreExecute() {
                 super.onPreExecute()
@@ -146,8 +146,8 @@ class InstagramMediaRequest : Parcelable {
                 mediaResponse.httpStatusCode = 200
             }
 
-            override fun onPostExecute(mediaResponse: MediaResponse) {
-                if (mediaResponse.error != null) {
+            override fun onPostExecute(mediaResponse: MediaResponse?) {
+                if (mediaResponse!!.error != null) {
                     listener.onError(mediaResponse.error)
                 } else {
 //                    Log.d(TAG, "mediaResponse.photos getMedia=" + mediaResponse.photos.size() + "");
@@ -175,7 +175,7 @@ class InstagramMediaRequest : Parcelable {
                 return mediaResponse
             }
         }
-        requestTask.execute()
+        requestTask?.execute()
     }
 
     fun getMediaId(
@@ -186,7 +186,7 @@ class InstagramMediaRequest : Parcelable {
         ctx: Context?,
         isToShowLoader: Boolean
     ) {
-        mediaIdRequestTask = object : AsyncTask<Void?, Void?, MediaIdResponse>() {
+        mediaIdRequestTask = object : AsyncTask<Void?, Void?, MediaIdResponse?>() {
             private var context: Context? = null
             override fun onPreExecute() {
                 super.onPreExecute()
@@ -301,8 +301,8 @@ class InstagramMediaRequest : Parcelable {
                 Log.d(TAG, "photos3=" + photos.size + "")
             }
 
-            override fun onPostExecute(mediaResponse: MediaIdResponse) {
-                if (mediaResponse.error != null) {
+            override fun onPostExecute(mediaResponse: MediaIdResponse?) {
+                if (mediaResponse!!.error != null) {
                     listener.onError(mediaResponse.error)
                 } else {
                     Log.d(TAG, "mediaResponse.photos=" + mediaResponse.photos!!.size + "")
@@ -333,7 +333,7 @@ class InstagramMediaRequest : Parcelable {
                 return mediaResponse
             }
         }
-        mediaIdRequestTask.execute()
+        mediaIdRequestTask?.execute()
     }
 
     private fun addPhotosToList(
@@ -738,7 +738,7 @@ class InstagramMediaRequest : Parcelable {
         }
     }
 
-    companion object CREATOR : Parcelable.Creator<InstagramMediaRequest> {
+     object CREATOR : Parcelable.Creator<InstagramMediaRequest> {
         override fun createFromParcel(parcel: Parcel): InstagramMediaRequest {
             return InstagramMediaRequest(parcel)
         }

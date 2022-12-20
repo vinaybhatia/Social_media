@@ -55,9 +55,9 @@ import ly.kite.socialmedia.common.DeviceManager.deleteFileAndFolderFromInternalS
 import ly.kite.socialmedia.common.UIUtil.dismissDialog
 import ly.kite.socialmedia.common.UIUtil.showProgressDialogWithText
 import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbTokenToPreferences
-import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.saveFbTokenToPreferences
-import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.saveFbUserIdToPreferences
-import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.saveFbUserNameToPreferences
+import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbUserIdToPreferences
+import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbUserNameToPreferences
+
 import org.json.JSONArray
 import org.json.JSONException
 import java.io.IOException
@@ -70,8 +70,9 @@ import java.util.*
  * This class is an agent for the Facebook APIs.
  *
  */
+
 class FacebookAgent private constructor(////////// Member Variable(s) //////////
-   
+
 ) {
     ////////// Static Constant(s) //////////
     private var dialog: Dialog? = null
@@ -85,12 +86,12 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
         sFacebookAgent = null
     }
 
-    ////////// Member Variable(s) //////////
-    @SuppressLint("StaticFieldLeak")
-    private val mActivity: Activity? = null
+
+    private var mActivity: Activity? = null
+
     ////////// Constructor(s) //////////
     init {
-        sdkInitialize(mActivity.applicationContext)
+        sdkInitialize(mActivity!!.applicationContext)
         mCallbackManager = create()
     }
     ////////// Method(s) //////////
@@ -115,9 +116,9 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
     private fun newAccessToken(accessToken: AccessToken) {
 //        Log.d(LOG_TAG, "newAcceessToken( accessToken ):\n" + stringFrom(accessToken));
         if (mPendingRequest != null) {
-            val pendingRequest: ARequest<*> = mPendingRequest
+            val pendingRequest: ARequest<*>? = mPendingRequest
             mPendingRequest = null
-            pendingRequest.onExecute()
+            pendingRequest!!.onExecute()
         }
     }
 
@@ -128,7 +129,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
      */
     private fun executeRequest(request: ARequest<*>) {
         // If we don't have an access token - make a log-in request.
-        val accessToken: AccessToken = AccessToken.getCurrentAccessToken()
+        val accessToken: AccessToken? = AccessToken.getCurrentAccessToken()
         if (accessToken == null || accessToken.userId == null) {
             val loginManager = LoginManager.getInstance()
             loginManager.registerCallback(mCallbackManager, LoginResultCallback())
@@ -148,7 +149,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
         if (accessToken.isExpired) {
             Log.i(LOG_TAG, "Access token has expired - refreshing")
             mPendingRequest = request
-            refreshCurrentAccessTokenAsync.refreshCurrentAccessTokenAsync()
+            AccessToken.refreshCurrentAccessTokenAsync()
             return
         }
 
@@ -226,7 +227,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
             // start a brand new request.
             val photosGraphRequestCallback = PhotosGraphRequestCallback(mCallback, id)
             if (mNextPhotosPageGraphRequest != null) {
-                mNextPhotosPageGraphRequest!!.callback = photosGraphRequestCallback
+                mNextPhotosPageGraphRequest!!.callback=photosGraphRequestCallback
                 mNextPhotosPageGraphRequest!!.executeAsync()
                 mNextPhotosPageGraphRequest = null
                 return
@@ -380,7 +381,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
      *
      */
     private inner class AlbumsGraphRequestCallback internal constructor(var mAlbumCallback: IAlbumsCallback?) :
-        Callback {
+        GraphRequest.Callback {
         override fun onCompleted(graphResponse: GraphResponse) {
 //            Log.d(LOG_TAG, "Graph response: " + graphResponse);
 
@@ -429,7 +430,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
      * A user email callback
      *
      */
-    private inner class UserEmailRequestCallback internal constructor() : Callback {
+    private inner class UserEmailRequestCallback internal constructor() : GraphRequest.Callback {
         override fun onCompleted(graphResponse: GraphResponse) {
 //            Log.d(LOG_TAG, "Graph response: " + graphResponse);
 
@@ -461,9 +462,9 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
                 try {
                     val email = responseJSONObject.getString(JSON_NAME_NAME)
                     //                    Log.d("### EMAIL : ", " "+ email);
-                    saveFbUserNameToPreferences(mActivity, email)
+                    saveFbUserNameToPreferences(mActivity!!, email)
                     saveFbUserIdToPreferences(
-                        mActivity, responseJSONObject.getString(
+                        mActivity!!, responseJSONObject.getString(
                             JSON_NAME_ID
                         )
                     )
@@ -484,7 +485,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
     private inner class PhotosGraphRequestCallback internal constructor(
         var mPhotosCallback: IPhotosCallback?,
         private val id: Long
-    ) : Callback {
+    ) : GraphRequest.Callback {
         override fun onCompleted(graphResponse: GraphResponse) {
 //            Log.d(LOG_TAG, "Graph response: " + graphResponse);
 
@@ -619,7 +620,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
             val dataJSONArray = jsonArrays[0]
             val albumArrayList = ArrayList<Album>()
             val responseJSONObject = response.getJSONObject()
-            for (photoIndex in 0 until dataJSONArray.length()) {
+            for (photoIndex in 0 until dataJSONArray!!.length()) {
                 try {
                     val photoJSONObject = dataJSONArray.getJSONObject(photoIndex)
                     val id = photoJSONObject.getString(JSON_NAME_ID)
@@ -663,7 +664,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
 
     private fun saveToShredPreference(albumArrayList: ArrayList<Album>, key: String) {
         val prefs: SharedPreferences =
-            mActivity.getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
+            mActivity!!.getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
         val editor = prefs.edit()
         val gson = Gson()
         val jsonAlbums = gson.toJson(albumArrayList)
@@ -718,7 +719,11 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
             albumsRequest!!.onCancel()
         }
     }
-
+    private fun FacebookAgent(activity: Activity) {
+        mActivity = activity
+        sdkInitialize(activity.applicationContext)
+        mCallbackManager = create()
+    }
     companion object {
         private const val LOG_TAG = "FacebookAgent"
         private const val PERMISSION_USER_PHOTOS = "user_photos"
@@ -760,13 +765,16 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
          * Returns an instance of this agent.
          *
          */
-        fun getInstance(activity: Activity): FacebookAgent? {
-            mActivity = activity
+        ////////// Static Initialiser(s) //////////
+        ////////// Static Method(s) //////////
+        open fun getInstance(activity: Activity?): FacebookAgent? {
             if (sFacebookAgent == null) {
-                sFacebookAgent = FacebookAgent(activity)
+                sFacebookAgent = FacebookAgent()
             }
             return sFacebookAgent
         }
+
+
 
         /*****************************************************
          *
@@ -787,6 +795,10 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
             return stringBuilder.toString()
         }
 
+        ////////// Member Variable(s) //////////
+
+        ////////// Constructor(s) //////////
+
         fun logout() {
             disconnectFromFacebook()
             sFacebookAgent = null
@@ -801,7 +813,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
                 "/me/permissions/",
                 null,
                 HttpMethod.DELETE,
-                object : Callback() {
+                object : GraphRequest.Callback {
                     override fun onCompleted(graphResponse: GraphResponse) {
                         LoginManager.getInstance().logOut()
                     }
