@@ -109,7 +109,7 @@ class FacebookPhotoPickerActivity : Activity(), IPhotosCallback, IAlbumsCallback
 
 
         // Get the Facebook agent
-        mFacebookAgent = FacebookAgent.Companion.getInstance(this)
+        mFacebookAgent = FacebookAgent.getInstance(this);
         try {
             val info =
                 packageManager.getPackageInfo(this.packageName, PackageManager.GET_SIGNATURES)

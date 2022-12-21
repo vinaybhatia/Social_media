@@ -34,7 +34,6 @@
 ///// Package Declaration /////
 package ly.kite.socialmedia.facebookphotopicker
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
@@ -57,7 +56,6 @@ import ly.kite.socialmedia.common.UIUtil.showProgressDialogWithText
 import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbTokenToPreferences
 import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbUserIdToPreferences
 import ly.kite.socialmedia.instagramphotopicker.InstagramPhotoPicker.Companion.saveFbUserNameToPreferences
-
 import org.json.JSONArray
 import org.json.JSONException
 import java.io.IOException
@@ -71,9 +69,7 @@ import java.util.*
  *
  */
 
-class FacebookAgent private constructor(////////// Member Variable(s) //////////
-
-) {
+class FacebookAgent private constructor(mActivity: Activity) {
     ////////// Static Constant(s) //////////
     private var dialog: Dialog? = null
     var loginManager: LoginManager? = null
@@ -87,7 +83,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
     }
 
 
-    private var mActivity: Activity? = null
+
 
     ////////// Constructor(s) //////////
     init {
@@ -725,6 +721,7 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
         mCallbackManager = create()
     }
     companion object {
+        private var mActivity: Activity? = null
         private const val LOG_TAG = "FacebookAgent"
         private const val PERMISSION_USER_PHOTOS = "user_photos"
         private const val GRAPH_PATH_MY_ALBUMS = "/me/albums"
@@ -767,14 +764,22 @@ class FacebookAgent private constructor(////////// Member Variable(s) //////////
          */
         ////////// Static Initialiser(s) //////////
         ////////// Static Method(s) //////////
-        open fun getInstance(activity: Activity?): FacebookAgent? {
+//        open fun getInstance(activity: Activity?): FacebookAgent? {
+//            if (sFacebookAgent == null) {
+//                sFacebookAgent = FacebookAgent()
+//            }
+//            return sFacebookAgent
+//        }
+
+        ////////// Static Initialiser(s) //////////
+        ////////// Static Method(s) //////////
+        fun getInstance(activity: Activity): FacebookAgent? {
+            mActivity = activity
             if (sFacebookAgent == null) {
-                sFacebookAgent = FacebookAgent()
+                sFacebookAgent = FacebookAgent(mActivity!!)
             }
             return sFacebookAgent
         }
-
-
 
         /*****************************************************
          *

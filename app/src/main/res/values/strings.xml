@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">frameworks</string>
+    <string name="app_name">Framework_Android</string>
+    <string name="connect_to_your_facebook">Connect to your Facebook?</string>
+    <string name="label_connect">Connect</string>
 </resources>
